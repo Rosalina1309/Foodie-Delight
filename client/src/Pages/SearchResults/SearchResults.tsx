@@ -1,26 +1,47 @@
 import React, {useState, useEffect} from 'react';
 import {useParams, Link, Route, Routes} from 'react-router-dom';
 
-import InsForClickedRecipeFromSearch from './InsForClickedRecipeFromSearch';
-import { fetchRecipesByIngredient } from '../apiServices/apiServices';
+import { fetchRecipesByIngredient } from '../../ApiServices/apiServices';
+import Recipe from '../Recipe/Recipe';
 
-function IngredientSearchResults ({isLoading}) {
+import { RecipeType } from '../../@types/recipe';
 
-  const [recipes, setRecipes] = useState([]);
+
+
+interface SearchResultsProps {
+  isLoading: boolean;
+}
+
+
+
+
+export default function SearchResults({ isLoading }: SearchResultsProps) {
+
+  const [recipes, setRecipes] = useState<RecipeType[]>([]);
   const {ingredient} = useParams();
 
   useEffect(() => {
     async function fetchData() {
+      if (!ingredient) { 
+        console.error("Ingredient is not defined.");
+        return;
+      }
+
       try {
-        const data = await fetchRecipesByIngredient(ingredient); 
-        setRecipes(data);
+        const data = await fetchRecipesByIngredient(ingredient);
+        if (data) {
+          setRecipes(data);
+        } else {
+          setRecipes([]);
+        }
       } catch (err) {
-        console.log(err);
+        console.error(err);
+        setRecipes([]);
       }
     }
-
     fetchData();
-  }, [ingredient]);
+  }, [ingredient]);  
+
 
   return (
    
@@ -46,7 +67,7 @@ function IngredientSearchResults ({isLoading}) {
     <Routes>
         <Route
           path="/ingredient/:ingredient/:recipeId"
-          element={<InsForClickedRecipeFromSearch />}
+          element={<Recipe />}
         />
       </Routes>
       
@@ -55,4 +76,3 @@ function IngredientSearchResults ({isLoading}) {
   );
 }
 
-export default IngredientSearchResults;

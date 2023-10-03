@@ -1,22 +1,37 @@
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { removeFromFavorites } from '../apiServices/apiServices';
+import { fetchLikedDishes, removeFromFavorites } from '../../ApiServices/apiServices';
+import { FavoriteRecipeType } from '../../@types/recipe';
 
-function MyFavorites() {
-  const [likedDishes, setLikedDishes] = useState([]);
+
+interface MyFavoritesProps {
+  recipesThatAreLiked: FavoriteRecipeType[];
+}
+
+
+
+export default function MyFavorites({recipesThatAreLiked}: MyFavoritesProps) {
+  const [likedDishes, setLikedDishes] = useState<FavoriteRecipeType[]>([]);
 
   useEffect(() => {
-    axios.get('http://localhost:4242/likedDishes')
-      .then((response) => {
-        setLikedDishes(response.data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-  }, []); 
+    async function fetchData() {
+      try {
+        const dishes = await fetchLikedDishes();
+        if (dishes) {
+          setLikedDishes(dishes);
+        } else {
+          setLikedDishes([]);
+        }
+      } catch (err) {
+        console.error(err);
+        setLikedDishes([]);
+      }
+    }
+    fetchData();
+  },);  
 
-  const handleRemoveFromFavorites = (dishId) => {
+
+  
+  const handleRemoveFromFavorites = (dishId: number) => {
     removeFromFavorites(dishId)
       .then(() => {
         setLikedDishes((prevDishes) => prevDishes.filter((dish) => dish._id !== dishId));
@@ -30,7 +45,7 @@ function MyFavorites() {
     <div className='favorite-dishes'>
       <h1>My Favorite Dishes</h1>
       <div className='fav-dish-list'>
-        {likedDishes.map((dish) => (
+        {likedDishes && likedDishes.map((dish) => (
           <div className='fav-dish-card' key={dish._id}>
             <div className='left-fav-dish-card'>
               <h2>{dish.title}</h2>
@@ -40,7 +55,6 @@ function MyFavorites() {
             <div className='right-fav-dish-card'>
               <p><strong>Instructions:</strong> {dish.instructions}</p>
             </div>
-          
           </div>
         ))}
       </div>
@@ -48,4 +62,3 @@ function MyFavorites() {
   );
 }
 
-export default MyFavorites;
