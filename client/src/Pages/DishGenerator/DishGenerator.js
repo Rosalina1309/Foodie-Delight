@@ -1,12 +1,10 @@
-
-
 import React, { useState, useEffect } from 'react';
-import { fetchRandomDishes } from '../apiServices/apiServices'; 
+import { fetchRandomDishes } from '../../apiServices/apiServices'
 
-function RandomDish() {
+
+export default function DishGenerator() {
   const [randomRecipe, setRandomRecipe] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
 
   useEffect(() => {
     async function fetchData() {
@@ -40,4 +38,3 @@ function RandomDish() {
   );
 }
 
-export default RandomDish;
